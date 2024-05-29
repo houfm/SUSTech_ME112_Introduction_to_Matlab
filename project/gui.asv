@@ -135,7 +135,7 @@ function ConnectingGame
 
         [solution_pairs, solution_nums] = solve_game(board, generated_pairs)
         for i=1:solution_nums
-            step_text = text(700, 400, ['Step: ',num2str(i)], ...
+            game_status_text = text(700, 400, ['step',num2str(i)], ...
                         'FontSize', 18, ...
                         'FontWeight', 'bold', ...
                         'Color', [0.2 0.2 0.2]);        
@@ -165,8 +165,7 @@ function ConnectingGame
                     end
                 end
             end
-             pause(1)
-            delete(step_text);
+            delete(game_status_text);
         end
 
         delete(game_status_text);
@@ -175,8 +174,8 @@ function ConnectingGame
                             'FontSize', 18, ...
                             'FontWeight', 'bold', ...
                             'Color', [0.2 0.2 0.2]);   
-        pause(2)
-        delete(game_status_text)
+        pause(0.5)
+        de
     end
 
     % Callback function
