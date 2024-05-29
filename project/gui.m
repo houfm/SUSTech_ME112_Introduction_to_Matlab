@@ -25,8 +25,8 @@ function ConnectingGame
     l=6;
     w=6;
     num_kinds=6;
-    pairs=8;
-    board = init_game_board(l,w,num_kinds,pairs);
+    pairs = 20;
+    [board, generated_pairs] = init_game_board(l,w,num_kinds,pairs);
     
     % Draw board GUI
     MainFig=figure('units','pixels', ...
@@ -142,6 +142,7 @@ function ConnectingGame
                     % Check if game is over
                     board = result_board;
                     [game_over, point_exist] = check_game_over(board);
+                    [solution_pairs, solution_pairs_num] = solve_game(board, generated_pairs)
                     if game_over
                         if point_exist
                             game_over_text = text(700, 300, ['Game Over: FAILED.'], ...
@@ -237,32 +238,38 @@ function ConnectingGame
     end
 end
 
-function board = init_game_board(length, width, num_kinds, pairs)
-    % ?????????????????????????????????????????????????????
+function [board, generated_pairs] = init_game_board(length, width, num_kinds, pairs)
+    % generate board and pairs accordingt o input
     board = zeros(length, width);
+    generated_pairs = zeros(pairs, 4);
     for i = 1:pairs
-        kind = randi([1 num_kinds]); % ?????????????
+        kind = randi([1 num_kinds]); % init chess kinds
         x = randi([1 length]);
         y = randi([1 length]);
-        direction = randi([1 4]); % ?????????????????????
+        generated_pairs(i, 1) = x;
+        generated_pairs(i, 2) = y;
+        direction = randi([1 4]); % generate direction from up, down, left, and right
         if direction == 1 && y ~= 1
             % up
+            generated_pairs(i, 3) = x;
             limit = y - 1;
             num_points = randi([1 limit]);
             flag = true;
             for j = 0:num_points
                 if board(x, y-j) ~= 0
                     flag = false;
-                    % ???????????????????????????????
+                    % detect whether there is a different size in the way
                 end
             end
             if flag
                 for j = 0:num_points
                     board(x, y-j) = kind;
                 end
+                generated_pairs(i, 4) = y-num_points;
             end
         elseif direction == 2 && y ~= width
             % down
+            generated_pairs(i, 3) = x;
             limit = width - y;
             num_points = randi([1 limit]);
             flag = true;
@@ -275,9 +282,11 @@ function board = init_game_board(length, width, num_kinds, pairs)
                 for j = 0:num_points
                     board(x, y+j) = kind;
                 end
+                generated_pairs(i, 4) = y+num_points;
             end
         elseif direction == 3 && x ~= 1
             % left
+            generated_pairs(i, 4) = y;
             limit = x - 1;
             num_points = randi([1 limit]);
             flag = true;
@@ -290,9 +299,11 @@ function board = init_game_board(length, width, num_kinds, pairs)
                 for j = 0:num_points
                     board(x-j, y) = kind;
                 end
+                generated_pairs(i, 3) = x-num_points;
             end
         elseif direction == 4 && x ~= length
             % right
+            generated_pairs(i, 4) = y;
             limit = length - x;
             num_points = randi([1 limit]);
             flag = true;
@@ -305,6 +316,7 @@ function board = init_game_board(length, width, num_kinds, pairs)
                 for j = 0:num_points
                     board(x+j, y) = kind;
                 end
+                generated_pairs(i, 3) = x+num_points;
             end
         end
     end
@@ -336,6 +348,75 @@ function [game_over, point_exist] = check_game_over(board)
     end
     % 游戏结束条件：存在孤立的无法配对的点，或者所有点都已经被消除
     game_over = all_eliminated;
+end
+
+function [solution_pairs, solution_nums] = solve_game(board, generated_pairs)
+    generated_pairs_size = size(generated_pairs);
+    solution_nums = 0;
+    solution_pairs = zeros(generated_pairs_size(1), 4);
+    for i = 1:generated_pairs_size(1)
+        x1 = generated_pairs(i, 1);
+        y1 = generated_pairs(i, 2);
+        x2 = generated_pairs(i, 3);
+        y2 = generated_pairs(i, 4);
+        flag = true;
+        if x1 == 0 || x2 == 0 || y1 == 0 || y2 == 0
+            flag = false;
+        end
+        if (flag)
+            if x1 == x2
+                y_start = 0;
+                if y1 > y2
+                    y_start = y2;
+                else
+                    y_start = y1;
+                end
+                y_end = y1 + y2 - y_start;
+                solution_start = 0;
+                solution_end = 0;
+                for y = y_start:y_end
+                    if board(x1, y) ~= 0
+                        if solution_start == 0
+                            solution_start = y;
+                        end
+                        solution_end = y;
+                    end
+                end
+                if (solution_start ~= solution_end)
+                    solution_nums = solution_nums + 1;
+                    solution_pairs(solution_nums, 1) = x1;
+                    solution_pairs(solution_nums, 2) = solution_start;
+                    solution_pairs(solution_nums, 3) = x1;
+                    solution_pairs(solution_nums, 4) = solution_end;
+                end
+            else
+                x_start = 0;
+                if x1 > x2
+                    x_start = x2;
+                else
+                    x_start = x1;
+                end
+                x_end = x1 + x2 - x_start;
+                solution_start = 0;
+                solution_end = 0;
+                for x = x_start:x_end
+                    if board(x, y1) ~= 0
+                        if solution_start == 0
+                            solution_start = x;
+                        end
+                        solution_end = x;
+                    end
+                end
+                if (solution_start ~= solution_end)
+                    solution_nums = solution_nums + 1;
+                    solution_pairs(solution_nums, 1) = solution_start;
+                    solution_pairs(solution_nums, 2) = y1;
+                    solution_pairs(solution_nums, 3) = solution_end;
+                    solution_pairs(solution_nums, 4) = y1;
+                end
+            end
+        end
+    end
 end
     
     
