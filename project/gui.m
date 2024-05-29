@@ -119,28 +119,45 @@ function ConnectingGame
                
                 
                 if valid 
-                    % set(drawPicHdl(selectedPos(1),selectedPos(2)),'CData',ones(100,100,3).*0.95);
-                    % set(drawPicHdl(clickPos(1),clickPos(2)),'CData',ones(100,100,3).*0.95); % image size=100
-                    for i=1:l
-                        for j=1:w
-                            if board(i,j) == 0 && ...
-                                drawPicHdl(i,j)~=image( ...
-                    [(i-1)*100,i*100]+40+i*margin, ... %x
-                    [(j-1)*100,j*100]+40+j*margin,... %y
-                    picList.(['pic',num2str(board(i,j)+1)]), ...
-                    'tag',[num2str(i),num2str(j)],...
-                    'ButtonDownFcn',@clickOnPic)
-                                set(drawPicHdl(i,j),'CData',ones(100,100,3).*0.95);
+                    % Update board
+                    board = result_board;
+                    % Update GUI board
+                    if x1 == x2
+                        if y1 < y2
+                            for y = y1:y2
+                                set(drawPicHdl(x1,y),'CData',ones(100,100,3).*0.95);
+                            end
+                        else
+                            for y = y2:y1
+                                set(drawPicHdl(x1,y),'CData',ones(100,100,3).*0.95);
+                            end
+                        end
+                    elseif y1 == y2
+                        if x1 < x2
+                            for x = x1:x2
+                                set(drawPicHdl(x,y1),'CData',ones(100,100,3).*0.95);
+                            end
+                        else
+                            for x = x2:x1
+                                set(drawPicHdl(x,y1),'CData',ones(100,100,3).*0.95);
                             end
                         end
                     end
-                    count_text = text(700, 100, ['Eliminated Tiles: ' num2str(count)], ...
-                        'FontSize', 18, ...
-                        'FontWeight', 'bold', ...
-                        'Color', [0.2 0.2 0.2]);
+                    % for i=1:l
+                    %     for j=1:w
+                    %         if board(i,j) == 0 && ...
+                    %             drawPicHdl(i,j)~=image( ...
+                    % [(i-1)*100,i*100]+40+i*margin, ... %x
+                    % [(j-1)*100,j*100]+40+j*margin,... %y
+                    % picList.(['pic',num2str(board(i,j)+1)]), ...
+                    % 'tag',[num2str(i),num2str(j)],...
+                    % 'ButtonDownFcn',@clickOnPic)
+                    %             set(drawPicHdl(i,j),'CData',ones(100,100,3).*0.95);
+                    %         end
+                    %     end
+                    % end
 
                     % Check if game is over
-                    board = result_board;
                     [game_over, point_exist] = check_game_over(board);
                     [solution_pairs, solution_pairs_num] = solve_game(board, generated_pairs)
                     if game_over
